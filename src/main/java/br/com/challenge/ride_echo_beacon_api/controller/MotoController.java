@@ -23,6 +23,7 @@ import org.springframework.web.server.ResponseStatusException;
 import br.com.challenge.ride_echo_beacon_api.model.Moto;
 import br.com.challenge.ride_echo_beacon_api.model.dto.EchoBeaconResponse;
 import br.com.challenge.ride_echo_beacon_api.model.dto.MotoResponse;
+import br.com.challenge.ride_echo_beacon_api.repository.EchoBeaconRepository;
 import br.com.challenge.ride_echo_beacon_api.repository.MotoRepository;
 import jakarta.validation.Valid;
 
@@ -37,6 +38,9 @@ public class MotoController {
 
     @Autowired
     private MotoRepository repository;
+
+    @Autowired
+    private EchoBeaconRepository echoBeaconRepository;
 
     @GetMapping
     @Cacheable("motos")
@@ -59,10 +63,28 @@ public class MotoController {
     @PostMapping
     @ResponseStatus(code = HttpStatus.CREATED)
     @CacheEvict(value = "motos", allEntries = true)
-    public ResponseEntity<Moto> create(@RequestBody @Valid Moto moto) {
+    public MotoResponse create(@RequestBody @Valid Moto moto) {
         log.info("Cadastrando moto " + moto.getModelo());
-        repository.save(moto);
-        return ResponseEntity.status(201).body(moto);
+
+        if (moto.getEchoBeacon() != null && moto.getEchoBeacon().getId() != null) {
+            var echoBeacon = echoBeaconRepository.findById(moto.getEchoBeacon().getId())
+                    .orElseThrow(
+                            () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "EchoBeacon não encontrado"));
+            moto.setEchoBeacon(echoBeacon);
+        }
+
+        var motoSaved = repository.save(moto);
+
+        return new MotoResponse(
+                motoSaved.getId(),
+                motoSaved.getPlaca(),
+                motoSaved.getChassi(),
+                motoSaved.getModelo(),
+                motoSaved.getProblema(),
+                new EchoBeaconResponse(
+                        motoSaved.getEchoBeacon().getNumeroIdentificacao(),
+                        motoSaved.getEchoBeacon().getStatus()),
+                motoSaved.getDataRegistro());
     }
 
     @GetMapping("{id}")
@@ -83,19 +105,45 @@ public class MotoController {
 
     @DeleteMapping("{id}")
     @CacheEvict(value = "motos", allEntries = true)
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void destroy(@PathVariable Long id) {
+    public ResponseEntity<String> destroy(@PathVariable Long id) {
         log.info("Apagando moto " + id);
-        repository.delete(getMoto(id));
+        Moto moto = getMoto(id);
+        repository.delete(moto);
+        log.info("Moto " + id + " apagada com sucesso");
+        return ResponseEntity.ok("Moto com ID " + id + " foi deletada com sucesso.");
     }
 
     @PutMapping("{id}")
     @CacheEvict(value = "motos", allEntries = true)
-    public Moto update(@PathVariable Long id, @RequestBody Moto moto) {
+    public MotoResponse update(@PathVariable Long id, @RequestBody @Valid Moto moto) {
         log.info("Atualizando moto " + id + " para " + moto);
 
-        moto.setId(id);
-        return repository.save(moto);
+        Moto existingMoto = getMoto(id);
+
+        existingMoto.setPlaca(moto.getPlaca());
+        existingMoto.setChassi(moto.getChassi());
+        existingMoto.setModelo(moto.getModelo());
+        existingMoto.setProblema(moto.getProblema());
+
+        if (moto.getEchoBeacon() != null && moto.getEchoBeacon().getId() != null) {
+            var echoBeacon = echoBeaconRepository.findById(moto.getEchoBeacon().getId())
+                    .orElseThrow(
+                            () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "EchoBeacon não encontrado"));
+            existingMoto.setEchoBeacon(echoBeacon);
+        }
+
+        Moto updatedMoto = repository.save(existingMoto);
+
+        return new MotoResponse(
+                updatedMoto.getId(),
+                updatedMoto.getPlaca(),
+                updatedMoto.getChassi(),
+                updatedMoto.getModelo(),
+                updatedMoto.getProblema(),
+                new EchoBeaconResponse(
+                        updatedMoto.getEchoBeacon().getNumeroIdentificacao(),
+                        updatedMoto.getEchoBeacon().getStatus()),
+                updatedMoto.getDataRegistro());
     }
 
     private Moto getMoto(Long id) {

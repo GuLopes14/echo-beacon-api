@@ -77,9 +77,10 @@ public class EchoBeaconController {
     @DeleteMapping("{id}")
     @CacheEvict(value = "echoBeacons", allEntries = true)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void destroy(@PathVariable Long id) {
+    public ResponseEntity<String> destroy(@PathVariable Long id) {
         log.info("Apagando EchoBeacon " + id);
         repository.deleteById(id);
+        return ResponseEntity.ok("Echo Beacon com o ID " + id + " foi deletado com sucesso");
     }
 
     private EchoBeacon getBeacon(Long id) {
