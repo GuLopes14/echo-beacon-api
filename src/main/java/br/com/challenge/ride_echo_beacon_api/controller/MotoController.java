@@ -25,130 +25,136 @@ import br.com.challenge.ride_echo_beacon_api.model.dto.EchoBeaconResponse;
 import br.com.challenge.ride_echo_beacon_api.model.dto.MotoResponse;
 import br.com.challenge.ride_echo_beacon_api.repository.EchoBeaconRepository;
 import br.com.challenge.ride_echo_beacon_api.repository.MotoRepository;
+import br.com.challenge.ride_echo_beacon_api.specification.MotoSpecification;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/motos")
 public class MotoController {
 
-    private final Logger log = LoggerFactory.getLogger(getClass());
+        private final Logger log = LoggerFactory.getLogger(getClass());
 
-    public record MotoFilter(String modelo, String placa) {
-    }
-
-    @Autowired
-    private MotoRepository repository;
-
-    @Autowired
-    private EchoBeaconRepository echoBeaconRepository;
-
-    @GetMapping
-    @Cacheable("motos")
-    public List<MotoResponse> index() {
-        log.info("Listando todas as motos");
-        return repository.findAll().stream()
-                .map(moto -> new MotoResponse(
-                        moto.getId(),
-                        moto.getPlaca(),
-                        moto.getChassi(),
-                        moto.getModelo(),
-                        moto.getProblema(),
-                        new EchoBeaconResponse(
-                                moto.getEchoBeacon().getNumeroIdentificacao(),
-                                moto.getEchoBeacon().getStatus()),
-                        moto.getDataRegistro()))
-                .toList();
-    }
-
-    @PostMapping
-    @ResponseStatus(code = HttpStatus.CREATED)
-    @CacheEvict(value = "motos", allEntries = true)
-    public MotoResponse create(@RequestBody @Valid Moto moto) {
-        log.info("Cadastrando moto " + moto.getModelo());
-
-        if (moto.getEchoBeacon() != null && moto.getEchoBeacon().getId() != null) {
-            var echoBeacon = echoBeaconRepository.findById(moto.getEchoBeacon().getId())
-                    .orElseThrow(
-                            () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "EchoBeacon não encontrado"));
-            moto.setEchoBeacon(echoBeacon);
+        public record MotoFilter(String modelo, String placa) {
         }
 
-        var motoSaved = repository.save(moto);
+        @Autowired
+        private MotoRepository repository;
 
-        return new MotoResponse(
-                motoSaved.getId(),
-                motoSaved.getPlaca(),
-                motoSaved.getChassi(),
-                motoSaved.getModelo(),
-                motoSaved.getProblema(),
-                new EchoBeaconResponse(
-                        motoSaved.getEchoBeacon().getNumeroIdentificacao(),
-                        motoSaved.getEchoBeacon().getStatus()),
-                motoSaved.getDataRegistro());
-    }
+        @Autowired
+        private EchoBeaconRepository echoBeaconRepository;
 
-    @GetMapping("{id}")
-    public MotoResponse get(@PathVariable Long id) {
-        log.info("Buscando moto " + id);
-        Moto moto = getMoto(id);
-        return new MotoResponse(
-                moto.getId(),
-                moto.getPlaca(),
-                moto.getChassi(),
-                moto.getModelo(),
-                moto.getProblema(),
-                new EchoBeaconResponse(
-                        moto.getEchoBeacon().getNumeroIdentificacao(),
-                        moto.getEchoBeacon().getStatus()),
-                moto.getDataRegistro());
-    }
+        @GetMapping
+        @Cacheable("motos")
+        public List<MotoResponse> index(MotoFilter filters) {
+                log.info("Listando motos com filtros: modelo={}, placa={}", filters.modelo(), filters.placa());
+                var motos = repository.findAll(MotoSpecification.withFilters(filters));
 
-    @DeleteMapping("{id}")
-    @CacheEvict(value = "motos", allEntries = true)
-    public ResponseEntity<String> destroy(@PathVariable Long id) {
-        log.info("Apagando moto " + id);
-        Moto moto = getMoto(id);
-        repository.delete(moto);
-        log.info("Moto " + id + " apagada com sucesso");
-        return ResponseEntity.ok("Moto com ID " + id + " foi deletada com sucesso.");
-    }
-
-    @PutMapping("{id}")
-    @CacheEvict(value = "motos", allEntries = true)
-    public MotoResponse update(@PathVariable Long id, @RequestBody @Valid Moto moto) {
-        log.info("Atualizando moto " + id + " para " + moto);
-
-        Moto existingMoto = getMoto(id);
-
-        existingMoto.setPlaca(moto.getPlaca());
-        existingMoto.setChassi(moto.getChassi());
-        existingMoto.setModelo(moto.getModelo());
-        existingMoto.setProblema(moto.getProblema());
-
-        if (moto.getEchoBeacon() != null && moto.getEchoBeacon().getId() != null) {
-            var echoBeacon = echoBeaconRepository.findById(moto.getEchoBeacon().getId())
-                    .orElseThrow(
-                            () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "EchoBeacon não encontrado"));
-            existingMoto.setEchoBeacon(echoBeacon);
+                return motos.stream()
+                                .map(moto -> new MotoResponse(
+                                                moto.getId(),
+                                                moto.getPlaca(),
+                                                moto.getChassi(),
+                                                moto.getModelo(),
+                                                moto.getProblema(),
+                                                new EchoBeaconResponse(
+                                                                moto.getEchoBeacon().getNumeroIdentificacao(),
+                                                                moto.getEchoBeacon().getStatus()),
+                                                moto.getDataRegistro()))
+                                .toList();
         }
 
-        Moto updatedMoto = repository.save(existingMoto);
+        @PostMapping
+        @ResponseStatus(code = HttpStatus.CREATED)
+        @CacheEvict(value = "motos", allEntries = true)
+        public MotoResponse create(@RequestBody @Valid Moto moto) {
+                log.info("Cadastrando moto " + moto.getModelo());
 
-        return new MotoResponse(
-                updatedMoto.getId(),
-                updatedMoto.getPlaca(),
-                updatedMoto.getChassi(),
-                updatedMoto.getModelo(),
-                updatedMoto.getProblema(),
-                new EchoBeaconResponse(
-                        updatedMoto.getEchoBeacon().getNumeroIdentificacao(),
-                        updatedMoto.getEchoBeacon().getStatus()),
-                updatedMoto.getDataRegistro());
-    }
+                if (moto.getEchoBeacon() != null && moto.getEchoBeacon().getId() != null) {
+                        var echoBeacon = echoBeaconRepository.findById(moto.getEchoBeacon().getId())
+                                        .orElseThrow(
+                                                        () -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                                                        "EchoBeacon não encontrado"));
+                        moto.setEchoBeacon(echoBeacon);
+                }
 
-    private Moto getMoto(Long id) {
-        return repository
-                .findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Moto não encontrada"));
-    }
+                var motoSaved = repository.save(moto);
+
+                return new MotoResponse(
+                                motoSaved.getId(),
+                                motoSaved.getPlaca(),
+                                motoSaved.getChassi(),
+                                motoSaved.getModelo(),
+                                motoSaved.getProblema(),
+                                new EchoBeaconResponse(
+                                                motoSaved.getEchoBeacon().getNumeroIdentificacao(),
+                                                motoSaved.getEchoBeacon().getStatus()),
+                                motoSaved.getDataRegistro());
+        }
+
+        @GetMapping("{id}")
+        public MotoResponse get(@PathVariable Long id) {
+                log.info("Buscando moto " + id);
+                Moto moto = getMoto(id);
+                return new MotoResponse(
+                                moto.getId(),
+                                moto.getPlaca(),
+                                moto.getChassi(),
+                                moto.getModelo(),
+                                moto.getProblema(),
+                                new EchoBeaconResponse(
+                                                moto.getEchoBeacon().getNumeroIdentificacao(),
+                                                moto.getEchoBeacon().getStatus()),
+                                moto.getDataRegistro());
+        }
+
+        @DeleteMapping("{id}")
+        @CacheEvict(value = "motos", allEntries = true)
+        public ResponseEntity<String> destroy(@PathVariable Long id) {
+                log.info("Apagando moto " + id);
+                Moto moto = getMoto(id);
+                repository.delete(moto);
+                log.info("Moto " + id + " apagada com sucesso");
+                return ResponseEntity.ok("Moto com ID " + id + " foi deletada com sucesso.");
+        }
+
+        @PutMapping("{id}")
+        @CacheEvict(value = "motos", allEntries = true)
+        public MotoResponse update(@PathVariable Long id, @RequestBody @Valid Moto moto) {
+                log.info("Atualizando moto " + id + " para " + moto);
+
+                Moto existingMoto = getMoto(id);
+
+                existingMoto.setPlaca(moto.getPlaca());
+                existingMoto.setChassi(moto.getChassi());
+                existingMoto.setModelo(moto.getModelo());
+                existingMoto.setProblema(moto.getProblema());
+
+                if (moto.getEchoBeacon() != null && moto.getEchoBeacon().getId() != null) {
+                        var echoBeacon = echoBeaconRepository.findById(moto.getEchoBeacon().getId())
+                                        .orElseThrow(
+                                                        () -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                                                        "EchoBeacon não encontrado"));
+                        existingMoto.setEchoBeacon(echoBeacon);
+                }
+
+                Moto updatedMoto = repository.save(existingMoto);
+
+                return new MotoResponse(
+                                updatedMoto.getId(),
+                                updatedMoto.getPlaca(),
+                                updatedMoto.getChassi(),
+                                updatedMoto.getModelo(),
+                                updatedMoto.getProblema(),
+                                new EchoBeaconResponse(
+                                                updatedMoto.getEchoBeacon().getNumeroIdentificacao(),
+                                                updatedMoto.getEchoBeacon().getStatus()),
+                                updatedMoto.getDataRegistro());
+        }
+
+        private Moto getMoto(Long id) {
+                return repository
+                                .findById(id)
+                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                "Moto não encontrada"));
+        }
 }
