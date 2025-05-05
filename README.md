@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 # 🏍️ Ride Echo Beacon API
-=======
-# 🚀 Ride Echo Beacon API
->>>>>>> 6c1e3c5 (final update)
 
 O projeto **Ride Echo Beacon API** foi desenvolvido para a empresa **Mottu** com o objetivo de implementar uma solução tecnológica que melhore a organização e localização das motos no pátio da empresa. A solução integra hardware, software e banco de dados para facilitar a gestão e identificação de veículos de forma eficiente.
 
