@@ -1,14 +1,12 @@
 package br.com.challenge.ride_echo_beacon_api.controller;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,8 +21,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import br.com.challenge.ride_echo_beacon_api.model.Moto;
+import br.com.challenge.ride_echo_beacon_api.model.dto.EchoBeaconResponse;
+import br.com.challenge.ride_echo_beacon_api.model.dto.MotoResponse;
 import br.com.challenge.ride_echo_beacon_api.repository.MotoRepository;
-import br.com.challenge.ride_echo_beacon_api.specification.MotoSpecification;
 import jakarta.validation.Valid;
 
 @RestController
@@ -41,11 +40,20 @@ public class MotoController {
 
     @GetMapping
     @Cacheable("motos")
-    public Page<Moto> index(MotoFilter filters,
-            @PageableDefault(size = 10, sort = "id", direction = Direction.ASC) Pageable pageable) {
-        log.info("Listando motos com filtros e paginação");
-        var specification = MotoSpecification.withFilters(filters);
-        return repository.findAll(specification, pageable);
+    public List<MotoResponse> index() {
+        log.info("Listando todas as motos");
+        return repository.findAll().stream()
+                .map(moto -> new MotoResponse(
+                        moto.getId(),
+                        moto.getPlaca(),
+                        moto.getChassi(),
+                        moto.getModelo(),
+                        moto.getProblema(),
+                        new EchoBeaconResponse(
+                                moto.getEchoBeacon().getNumeroIdentificacao(),
+                                moto.getEchoBeacon().getStatus()),
+                        moto.getDataRegistro()))
+                .toList();
     }
 
     @PostMapping
@@ -58,9 +66,19 @@ public class MotoController {
     }
 
     @GetMapping("{id}")
-    public Moto get(@PathVariable Long id) {
+    public MotoResponse get(@PathVariable Long id) {
         log.info("Buscando moto " + id);
-        return getMoto(id);
+        Moto moto = getMoto(id);
+        return new MotoResponse(
+                moto.getId(),
+                moto.getPlaca(),
+                moto.getChassi(),
+                moto.getModelo(),
+                moto.getProblema(),
+                new EchoBeaconResponse(
+                        moto.getEchoBeacon().getNumeroIdentificacao(),
+                        moto.getEchoBeacon().getStatus()),
+                moto.getDataRegistro());
     }
 
     @DeleteMapping("{id}")
