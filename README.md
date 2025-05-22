@@ -1,91 +1,58 @@
 
-# Sistema EchoBeacon 🚨
+# 🏍️ Ride Echo Beacon API
 
-## Integrantes 👥
+O projeto **Ride Echo Beacon API** foi desenvolvido para a empresa **Mottu** com o objetivo de implementar uma solução tecnológica que melhore a organização e localização das motos no pátio da empresa. A solução integra hardware, software e banco de dados para facilitar a gestão e identificação de veículos de forma eficiente.
 
-- Gustavo Lopes Santos da Silva - RM: 556859  
-- Renato de Freitas David Campiteli - RM: 555627  
-- Gabriel Santos Jablonski - RM: 555452  
+---
 
-## Visão Geral
+# 👔 Integrantes
+* **Gustavo Lopes Santos da Silva** - RM: 556859
+* **Renato de Freitas David Campiteli** - RM: 555627
+* **Gabriel Santos Jablonski** - RM: 555452
 
-O projeto em desenvolvimento para a empresa **Mottu** tem como objetivo implementar uma solução tecnológica para **melhorar a organização e a localização das motos** no pátio da empresa, facilitando a **gestão e identificação** de cada veículo de forma mais eficiente. A solução é composta pelos seguintes componentes:
+## 🛠️ Descrição do Projeto
 
-1. **EchoBeacon**: Pequenas placas eletrônicas instaladas em cada moto, com **sistema de som (alarme)** e **LED** para identificação rápida 🔊💡  
-2. **Sistema de Cadastro**: Desenvolvido em **Java** e **NextJS**, registra as informações das motos no banco de dados 🧾  
-3. **Aplicativo Móvel**: Conectado ao banco de dados, permite aos colaboradores consultar os detalhes das motos e **ativar o alarme e LED** para localização 📱  
+O projeto em desenvolvimento para a empresa **Mottu** visa implementar uma solução tecnológica para melhorar a organização e a localização das motos no pátio da empresa, facilitando a gestão e a identificação de cada veículo de forma mais eficiente. O sistema será composto por uma série de componentes integrados, incluindo **Arduino**, um **aplicativo móvel** e um **banco de dados centralizado**.
 
-## Objetivo 🎯
+A solução será composta por pequenas placas eletrônicas, chamadas de **"EchoBeacon"**, que serão instaladas em cada moto. Essas placas conterão:
+- Um **sistema de som** (buzzer).
+- Um **LED** para sinalização visual.
 
-Resolver o problema de identificar rapidamente as motos no pátio, otimizando a gestão e melhorando a eficiência da empresa **Mottu**.
+Quando uma moto chega ao pátio, informações como **placa**, **chassi** e detalhes sobre qualquer problema específico do veículo serão registradas em um banco de dados integrado. Esses dados poderão ser acessados por um sistema desenvolvido em **Java**.
 
-## Configuração ⚙️
+Além disso, os funcionários responsáveis pela organização e monitoramento das motos no pátio terão acesso a um **aplicativo móvel**, que estará conectado ao banco de dados. Através desse aplicativo, eles poderão:
+- Consultar informações detalhadas sobre as motos, como **placa**, **chassi** e **problemas**.
+- Ativar o **buzzer** e/ou o **LED** da moto selecionada, emitindo um som e sinal visual para facilitar sua localização, mesmo em um ambiente com várias motos.
 
-### Pré-requisitos
-- **Conta na Azure**: Para criar e gerenciar a máquina virtual.
-- **Docker Instalado**: No servidor remoto (VM criada na Azure).
-- **Java Development Kit (JDK)**: Para compilar o projeto Java.
-- **Maven**: Para o gerenciamento de dependências do projeto Java.
+Essa solução visa resolver o problema de localizar rapidamente as motos no pátio. Sem uma identificação clara e imediata, os funcionários enfrentam dificuldades para encontrar a moto correta entre tantas outras. Com a implementação desse sistema, a **Mottu** poderá organizar melhor suas motos e otimizar o tempo gasto na identificação e localização dos veículos dentro do pátio, garantindo uma gestão mais ágil e eficiente.
 
-### Passos
-1. **Instale o artefato**
-    ```bash
-    mvn clean install  
-    ```
+---
 
-2. **Crie a imagem no seu Docker Desktop**
-    ```bash
-    docker build -t seuUsuarioDockerHub/ride-echo-api .  
-    ```
+## 🎯 Objetivo
 
-3. **Baixe a imagem no seu Docker Desktop**
-    ```bash
-    docker push seuUsuarioDockerHub/ride-echo-api
-    ```
+- **Facilitar a localização de motos no pátio da empresa.**
+- **Otimizar o tempo dos funcionários na identificação de veículos.**
+- **Garantir uma gestão mais eficiente e organizada.**
 
-4. **Acesse a sua conta da azure**
-    ```bash
-    az login
-    ```
+---
 
-5. **Acesse o diretório de scripts**
-    ```bash
-    cd ./scripts/
-    ```
+## 🛡️ Tecnologias Utilizadas
 
-6. **Crie uma VM na Azure**
-    ```bash
-    bash create-vm.sh
-    ```
-    - **Nota:** O script `create-vm.sh` irá criar uma VM na Azure e registrar o IP público em um arquivo chamado `vm_ip.txt`.
+- **Java 17**: Linguagem principal para o desenvolvimento da API.
+- **Spring Boot**: Framework para criação da API REST.
+- **Spring Data JPA**: Acesso ao banco de dados.
+- **Banco de Dados H2**: Banco de dados em memória para desenvolvimento e testes.
+- **Maven**: Gerenciamento de dependências.
+- **Bean Validation**: Validação de dados.
 
-7. **Instale o Docker na VM**
-    ```bash
-    scp install_docker_remote.sh azureuser@<IpFornecido>:~/
-    ssh azureuser@<IpFornecido> 'bash install_docker_remote.sh'
-    ```
-     - **Nota:** Substitua `<IpFornecido>` pelo IP público fornecido no terminal, caso estiver com dificuldades de achar, procure no arquivo `vm_ip.txt`.
+---
 
-8. **Faça login na VM**
-    ```bash
-    ssh azureuser@<IpFornecido>
-    ```
+## ⚙️ Como Executar o Projeto
 
-9. **Faça login no docker**
-    ```bash
-    docker login
-    ```
-
-10. **Resgate a imagem criada anteriormente**
-    ```bash
-    docker pull seuUsuarioDockerHub/ride-echo-api
-    ```
-
-11. **Execute a imagem do Docker na VM da Azure**
-    ```bash
-    docker run -p 8080:8080 -d seuUsarioDockerHub/ride-echo-api
-    ```
-    - **Nota:** Insira a flag -d para executar o container em modo de background.
+### **Pré-requisitos**
+- **Java 17** ou superior.
+- **Maven**.
+- **IDE** (IntelliJ IDEA, Eclipse ou VS Code).
 
 ## Uso 🚀
 
