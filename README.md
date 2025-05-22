@@ -90,12 +90,12 @@ Resolver o problema de identificar rapidamente as motos no pátio, otimizando a 
 ## Uso 🚀
 
 - **Acesso à aplicação**: Após o container estar em execução, acesse a API pelo postman/ insomnia, etc.
-- **URL**: `http://<ipFornecidoDaVM:8080/`
+- **URL**: `http://<localhost:8080/`
 
 # 📘 Exemplos de Requisições para a API 
 
 ## 🔹 Criar um EchoBeacon (POST)
-- POST ipFornecidoDaVM:8080/echo-beacons
+- POST localhost:8080/echo-beacons
 - Content-Type: application/json
 ```http
 {
@@ -108,7 +108,7 @@ Resolver o problema de identificar rapidamente as motos no pátio, otimizando a 
 ```
 
 ## 🔹 Atualizar um EchoBeacon (PUT)
-- PUT ipFornecidoDaVM:8080/echo-beacons/4
+- PUT localhost:8080/echo-beacons/4
 - Content-Type: application/json
 ```http
 {
@@ -121,7 +121,7 @@ Resolver o problema de identificar rapidamente as motos no pátio, otimizando a 
 ```
 
 ## 🔹 Criar uma Moto (POST)
-- POST ipFornecidoDaVM:8080/motos
+- POST localhost:8080/motos
 - Content-Type: application/json
 ```http
 {
@@ -138,7 +138,7 @@ Resolver o problema de identificar rapidamente as motos no pátio, otimizando a 
 
 ## 🔹 Atualizar uma Moto (PUT)
 
-- PUT ipFornecidoDaVM:8080/motos/4
+- PUT localhost:8080/motos/4
 - Content-Type: application/json
 ```http
 {
@@ -155,10 +155,10 @@ Resolver o problema de identificar rapidamente as motos no pátio, otimizando a 
 
 ## ❌ Deletar uma Moto (DELETE)
 ```
-ipFornecidoDaVM:8080/motos/4
+localhost:8080/motos/4
 ```
 
 ## ❌ Deletar um EchoBeacon (DELETE)
 ```
-ipFornecidoDaVM:8080/echo-beacons/4
+localhost:8080/echo-beacons/4
 ```
