@@ -56,8 +56,8 @@ Essa solução visa resolver o problema de localizar rapidamente as motos no pá
 
 ## Uso 🚀
 
-- **Acesso à aplicação**: Após o container estar em execução, acesse a API pelo postman/ insomnia, etc.
-- **URL**: `http://<localhost:8080/`
+- **Execute o comando: `mvn spring-boot:run`** para iniciar a aplicação.
+- **URL**: `http://localhost:8080/`
 
 # 📘 Exemplos de Requisições para a API 
 
